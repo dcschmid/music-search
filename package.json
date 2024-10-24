@@ -10,8 +10,15 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.16.7",
     "@astrojs/check": "^0.9.4",
+    "@astrojs/node": "^8.3.4",
+    "astro": "^4.16.7",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
     "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node-fetch": "^2.6.11"
   }
 }

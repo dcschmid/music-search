@@ -2,15 +2,444 @@
 
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Musiksuche - Finde Alben und Songs</title>
+    <style is:global>
+      /* Grundstil */
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      h1 {
+        text-align: center;
+        color: #222;
+        font-size: 2.4rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      p {
+        text-align: center;
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+      }
+
+      /* Formularstil */
+      form {
+        max-width: 600px;
+        margin: 0 auto 30px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        border: 2px solid #007bff;
+      }
+
+      form input[type="text"] {
+        width: calc(100% - 24px);
+        padding: 14px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1.1rem;
+      }
+
+      form button {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.3rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition:
+          background-color 0.3s,
+          transform 0.2s;
+      }
+
+      form button:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+      }
+
+      #loadingText {
+        text-align: center;
+        color: #007bff;
+        font-size: 1.2rem;
+        margin-top: 20px;
+      }
+
+      /* Kartenstil */
+      .card-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+      }
+
+      .card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        overflow: hidden;
+        border: 2px solid transparent;
+        padding-bottom: 15px;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        border-color: #007bff;
+      }
+
+      .card img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-bottom: 2px solid #007bff;
+      }
+
+      .card-content {
+        padding: 20px;
+      }
+
+      .card h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #222;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .card p {
+        margin: 6px 0;
+        font-size: 1rem;
+        color: #666;
+      }
+
+      .card a,
+      .card button {
+        display: inline-block;
+        padding: 10px 18px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition:
+          background-color 0.3s,
+          transform 0.2s;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .card a:hover,
+      .card button:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+      }
+
+      /* Abstand zwischen den Links */
+      .linksDiv {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      /* Tracklist Style */
+      .tracklist {
+        margin-top: 10px;
+        padding-left: 0;
+        list-style: none;
+        font-size: 0.95rem;
+        color: #444;
+      }
+
+      .tracklist li {
+        margin-bottom: 8px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        border-left: 4px solid #007bff;
+        padding-left: 12px;
+        transition: background-color 0.2s;
+      }
+
+      .tracklist li:hover {
+        background-color: #e8f0fe;
+      }
+
+      /* Barrierefreiheitsstil */
+      .card a:focus,
+      .card button:focus {
+        outline: 2px dashed #0056b3;
+        outline-offset: 3px;
+      }
+
+      .platform-heading {
+        font-size: 1.9rem;
+        text-align: center;
+        color: #222;
+        margin-bottom: 20px;
+        font-weight: 700;
+      }
+
+      /* Responsive Anpassungen */
+      @media (max-width: 600px) {
+        form input[type="text"],
+        form button {
+          font-size: 1rem;
+        }
+
+        .card h2 {
+          font-size: 1.3rem;
+        }
+
+        .card p {
+          font-size: 0.95rem;
+        }
+
+        .linksDiv {
+          flex-direction: column;
+        }
+
+        .tracklist li {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Willkommen bei der Musiksuche</h1>
+
+    <p>
+      Geben Sie einen Künstlernamen und optional einen Albumnamen ein, um Alben und Songs auf Spotify, Apple Music und
+      Deezer zu finden.
+    </p>
+
+    <form id="searchForm">
+      <input
+        type="text"
+        id="artistName"
+        name="artistName"
+        placeholder="Künstlername eingeben"
+        aria-label="Künstlername eingeben"
+        required
+      />
+      <input
+        type="text"
+        id="albumName"
+        name="albumName"
+        placeholder="Albumnamen eingeben (optional)"
+        aria-label="Albumnamen eingeben (optional)"
+      />
+      <button type="submit" aria-label="Suche starten">Suchen</button>
+    </form>
+
+    <div id="loadingText" style="display: none;">Lade...</div>
+    <div id="results"></div>
+
+    <script>
+      const searchForm = document.getElementById("searchForm") as HTMLFormElement;
+      const resultsDiv = document.getElementById("results") as HTMLDivElement;
+      const loadingText = document.getElementById("loadingText") as HTMLDivElement;
+
+      searchForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget as HTMLFormElement);
+
+        // Ladeanzeige einblenden
+        loadingText.style.display = "block";
+        resultsDiv.innerHTML = "";
+
+        // API-Aufruf mit POST-Anfrage
+        const response = await fetch("/api/search", {
+          method: "POST",
+          body: formData,
+        });
+
+        const albums = await response.json();
+
+        loadingText.style.display = "none";
+
+        if (!albums || !albums.spotify || !albums.appleMusic || !albums.deezer) {
+          resultsDiv.innerHTML = "<p>Es wurden keine Alben gefunden oder ein Fehler ist aufgetreten.</p>";
+          console.log(albums);
+          return;
+        }
+
+        displayPlatformResults("Spotify", albums.spotify);
+        displayPlatformResults("Apple Music", albums.appleMusic);
+        displayPlatformResults("Deezer", albums.deezer);
+      });
+
+      function displayPlatformResults(platformName: string | null, albums: any[]) {
+        const platformHeading = document.createElement("h2");
+        platformHeading.textContent = platformName;
+        platformHeading.classList.add("platform-heading");
+        resultsDiv.appendChild(platformHeading);
+
+        const cardContainer = document.createElement("div");
+        cardContainer.classList.add("card-container");
+
+        albums.forEach(
+          (album: {
+            coverUrl: any;
+            name: string | null;
+            artist: any;
+            year: any;
+            previewUrl: string;
+            artistUrl: string;
+            albumUrl: string;
+            tracklist: any[];
+          }) => {
+            const card = document.createElement("div");
+            card.classList.add("card");
+
+            const coverImg = document.createElement("img");
+            coverImg.src = getResizedImageUrl(album.coverUrl);
+            coverImg.alt = `${album.name} Albumcover`;
+
+            const cardContent = document.createElement("div");
+            cardContent.classList.add("card-content");
+
+            const title = document.createElement("h2");
+            title.textContent = album.name;
+
+            const artist = document.createElement("p");
+            artist.textContent = `Künstler: ${album.artist}`;
+
+            const year = document.createElement("p");
+            year.textContent = `Erscheinungsjahr: ${album.year}`;
+
+            if (album.previewUrl) {
+              const audioPreview = document.createElement("audio");
+              audioPreview.controls = true;
+              const audioSource = document.createElement("source");
+              audioSource.src = album.previewUrl;
+              audioSource.type = "audio/mpeg";
+              audioPreview.appendChild(audioSource);
+              cardContent.appendChild(audioPreview);
+
+              // Kopier-Button für die Vorschau-URL
+              const copyBtn = document.createElement("button");
+              copyBtn.textContent = "Preview kopieren";
+              copyBtn.style.marginTop = "10px";
+              copyBtn.onclick = () => {
+                navigator.clipboard.writeText(album.previewUrl);
+                alert("Preview-URL kopiert!");
+              };
+              cardContent.appendChild(copyBtn);
+            }
+
+            const linksDiv = document.createElement("div");
+            linksDiv.classList.add("linksDiv");
+
+            if (album.artistUrl) {
+              const artistLink = document.createElement("a");
+              artistLink.href = album.artistUrl;
+              artistLink.textContent = "Künstler";
+              artistLink.setAttribute("aria-label", "Link zur Künstlerseite");
+              linksDiv.appendChild(artistLink);
+            }
+
+            if (album.albumUrl) {
+              const albumLink = document.createElement("a");
+              albumLink.href = album.albumUrl;
+              albumLink.textContent = "Album";
+              albumLink.setAttribute("aria-label", "Link zur Albumseite");
+              linksDiv.appendChild(albumLink);
+            }
+
+            // Download-Button für das Albumcover
+            const downloadBtn = document.createElement("button");
+            downloadBtn.textContent = "Cover herunterladen";
+            downloadBtn.style.marginTop = "10px";
+            downloadBtn.onclick = () =>
+              downloadImage(getResizedImageUrl(album.coverUrl), `${slugify(album.artist)}_${slugify(album.name)}.jpg`);
+            linksDiv.appendChild(downloadBtn);
+
+            card.appendChild(coverImg);
+            card.appendChild(cardContent);
+            cardContent.appendChild(title);
+            cardContent.appendChild(artist);
+            cardContent.appendChild(year);
+            cardContent.appendChild(linksDiv);
+
+            // Display the tracklist
+            if (album.tracklist && album.tracklist.length > 0) {
+              const tracklistTitle = document.createElement("p");
+              tracklistTitle.textContent = "Tracklist:";
+              cardContent.appendChild(tracklistTitle);
+
+              const tracklistUl = document.createElement("ul");
+              tracklistUl.classList.add("tracklist");
+
+              album.tracklist.forEach((track: { trackNumber: any; name: any; duration: number }) => {
+                const trackItem = document.createElement("li");
+                trackItem.textContent = `${track.trackNumber}. ${track.name} (${Math.floor(track.duration / 60000)}:${String(
+                  Math.floor((track.duration % 60000) / 1000)
+                ).padStart(2, "0")})`; // Format duration as mm:ss
+                tracklistUl.appendChild(trackItem);
+              });
+
+              cardContent.appendChild(tracklistUl);
+            }
+
+            cardContainer.appendChild(card);
+          }
+        );
+
+        resultsDiv.appendChild(cardContainer);
+      }
+
+      // Funktion zum Slugify für den Dateinamen
+      function slugify(text: { toString: () => string }) {
+        return text
+          .toString()
+          .toLowerCase()
+          .replace(/\s+/g, "-") // Leerzeichen durch Bindestrich ersetzen
+          .replace(/[^\w\-]+/g, "") // Nicht alphanumerische Zeichen entfernen
+          .replace(/\-\-+/g, "-") // Mehrfache Bindestriche durch einfachen Bindestrich ersetzen
+          .replace(/^-+/, "") // Bindestriche vom Anfang entfernen
+          .replace(/-+$/, ""); // Bindestriche vom Ende entfernen
+      }
+
+      // Funktion zum Downloaden des Bildes als Blob
+      async function downloadImage(imageUrl: string | URL | Request, fileName: string) {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+      }
+
+      // Funktion zum Anpassen der Bildgröße auf 300x300px
+      function getResizedImageUrl(url: string) {
+        return url.replace("{w}", "300").replace("{h}", "300");
+      }
+    </script>
+  </body>
 </html>
